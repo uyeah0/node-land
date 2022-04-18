@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
+var qs = require('querystring');
  
 function templateHTML(title, list, body){
   return `
@@ -43,7 +44,7 @@ var app = http.createServer(function(request,response){
           var template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
           response.writeHead(200);
           response.end(template);
-        });
+        })
       } else {
         fs.readdir('./data', function(error, filelist){
           fs.readFile(`data/${queryData.id}`, 'utf8', function(err, description){
@@ -55,12 +56,12 @@ var app = http.createServer(function(request,response){
           });
         });
       }
-    } else if(pathname === '/create'){
+    } else if(pathname==='/create') {
       fs.readdir('./data', function(error, filelist){
         var title = 'WEB - create';
         var list = templateList(filelist);
         var template = templateHTML(title, list, `
-          <form action="http://localhost:3000/process_create" method="post">
+          <form action="http://localhost:3000/create_process" method="post">
             <p><input type="text" name="title" placeholder="title"></p>
             <p>
               <textarea name="description" placeholder="description"></textarea>
@@ -68,12 +69,28 @@ var app = http.createServer(function(request,response){
             <p>
               <input type="submit">
             </p>
-          </form>
+         </form>
         `);
         response.writeHead(200);
         response.end(template);
       });
-    } else {
+    }else if(pathname === '/create_process'){
+      var body = '';
+      // post로 전송되는 데이터가 많을 경우
+      // 특정한 양을 수신할 때마다 서버는 이 콜백함수를 호출
+      request.on('data', function(data){
+          body += data;
+      });
+      request.on('end', function(){
+          var post = qs.parse(body);
+          var title = post.title;
+          var description = post.description;
+          console.log(post.title);
+      })
+      response.writeHead(200);
+      response.end('success');
+    }
+    else{
       response.writeHead(404);
       response.end('Not found');
     }

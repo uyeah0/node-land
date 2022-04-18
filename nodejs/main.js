@@ -44,7 +44,7 @@ var app = http.createServer(function(request,response){
           var template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
           response.writeHead(200);
           response.end(template);
-        })
+        });
       } else {
         fs.readdir('./data', function(error, filelist){
           fs.readFile(`data/${queryData.id}`, 'utf8', function(err, description){
@@ -56,7 +56,7 @@ var app = http.createServer(function(request,response){
           });
         });
       }
-    } else if(pathname==='/create') {
+    } else if(pathname === '/create'){
       fs.readdir('./data', function(error, filelist){
         var title = 'WEB - create';
         var list = templateList(filelist);
@@ -69,28 +69,29 @@ var app = http.createServer(function(request,response){
             <p>
               <input type="submit">
             </p>
-         </form>
+          </form>
         `);
         response.writeHead(200);
         response.end(template);
       });
-    }else if(pathname === '/create_process'){
+    } else if(pathname === '/create_process'){
       var body = '';
-      // post로 전송되는 데이터가 많을 경우
+       // post로 전송되는 데이터가 많을 경우
       // 특정한 양을 수신할 때마다 서버는 이 콜백함수를 호출
       request.on('data', function(data){
-          body += data;
+          body = body + data;
       });
       request.on('end', function(){
           var post = qs.parse(body);
           var title = post.title;
           var description = post.description;
-          console.log(post.title);
-      })
-      response.writeHead(200);
-      response.end('success');
-    }
-    else{
+          fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+            response.writeHead(302, {Location: `/?id=${title}`});
+            response.end();
+          })
+      });
+
+    } else {
       response.writeHead(404);
       response.end('Not found');
     }

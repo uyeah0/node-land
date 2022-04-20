@@ -12,10 +12,3 @@ var o = {
     func:f
 }
 o.func();
-
-// console.log(f);
-// f();
-
-// var i = if(true){ console.log(1); }
-
-// var w = while(true) { console.log(1) };
